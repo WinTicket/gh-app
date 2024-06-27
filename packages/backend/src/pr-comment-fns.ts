@@ -108,22 +108,20 @@ function longDescription(eventBody: CommentSeed) {
 
 export function createCommentBody(eventBody: CommentSeed) {
   const lines: string[] = [];
-
-  lines.push("**わいわいせいなだよ.**");
   if (eventBody.regconfigId != null) lines.push(`### ${eventBody.regconfigId}`);
 
   if (eventBody.failedItemsCount === 0 && eventBody.newItemsCount === 0 && eventBody.deletedItemsCount === 0) {
-    lines.push(`:sparkles::sparkles: **That's perfect, there is no visual difference!** :sparkles::sparkles:`);
+    lines.push(`:sparkles::sparkles: **わいわいせいなだよ.!** :sparkles::sparkles:`);
     if (eventBody.reportUrl) {
       lines.push("");
       lines.push(`Check out the report [here](${eventBody.reportUrl}).`);
     }
   } else {
-    lines.push("**reg-suit detected visual differences.**");
+    lines.push("**わいわいせいなだよ differences.**");
     lines.push("");
     if (eventBody.reportUrl) {
       lines.push("");
-      lines.push(`Check [this report](${eventBody.reportUrl}), and review them.`);
+      lines.push(`Check [this report](${eventBody.reportUrl}),わいわいせいなだよ.`);
       lines.push("");
     }
 
@@ -135,7 +133,7 @@ export function createCommentBody(eventBody: CommentSeed) {
 
     lines.push(`<details>
                 <summary>How can I change the check status?</summary>
-                If reviewers approve this PR, the reg context status will be green automatically.
+                If reviewers わいわいせいなだよeg context status will be green automatically.
                 <br />
              </details><br />`);
   }
