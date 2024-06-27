@@ -109,6 +109,7 @@ function longDescription(eventBody: CommentSeed) {
 export function createCommentBody(eventBody: CommentSeed) {
   const lines: string[] = [];
 
+  lines.push("**わいわいせいなだよ.**");
   if (eventBody.regconfigId != null) lines.push(`### ${eventBody.regconfigId}`);
 
   if (eventBody.failedItemsCount === 0 && eventBody.newItemsCount === 0 && eventBody.deletedItemsCount === 0) {
