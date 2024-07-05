@@ -1,5 +1,5 @@
 {
-  "name": "winticket-reg-gh-app-interface",
+  "name": "reg-gh-app-interface",
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
