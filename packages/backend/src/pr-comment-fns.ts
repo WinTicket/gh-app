@@ -4,7 +4,7 @@ import { CommentToPrBody } from "reg-gh-app-interface";
 import { PullRequestOpenPayload } from "./webhook-detect";
 import { decodeMetadata } from "./status-fns";
 
-export type CommentToPrEventBody  = CommentToPrBody;
+export type CommentToPrEventBody = CommentToPrBody;
 
 export interface WriteIssueCommentBody {
   body: string;
@@ -32,7 +32,8 @@ export function validateEventBody(input: Partial<CommentToPrEventBody>) {
     typeof input.newItemsCount === "number" &&
     typeof input.deletedItemsCount === "number" &&
     typeof input.passedItemsCount === "number" &&
-    (input.shortDescription == null || typeof input.shortDescription === "boolean")
+    (input.shortDescription == null || typeof input.shortDescription === "boolean") &&
+    (input.regconfigId == null || typeof input.regconfigId === "string")
     ;
   if (!result) throw new DataValidationError(400, "invalid params");
   return true;
@@ -45,6 +46,7 @@ export interface CommentSeed {
   deletedItemsCount: number;
   passedItemsCount: number;
   shortDescription?: boolean;
+  regconfigId?: string;
 }
 
 function tableItem(itemCount: number, header: string): [number, string] | null {
@@ -106,18 +108,20 @@ function longDescription(eventBody: CommentSeed) {
 
 export function createCommentBody(eventBody: CommentSeed) {
   const lines: string[] = [];
+  if (eventBody.regconfigId != null) lines.push(`### ${eventBody.regconfigId}`);
+
   if (eventBody.failedItemsCount === 0 && eventBody.newItemsCount === 0 && eventBody.deletedItemsCount === 0) {
-    lines.push(`:sparkles::sparkles: **That's perfect, there is no visual difference!** :sparkles::sparkles:`);
+    lines.push(`:sparkles::sparkles: **わいわいせいなだよ.!** :sparkles::sparkles:`);
     if (eventBody.reportUrl) {
       lines.push("");
       lines.push(`Check out the report [here](${eventBody.reportUrl}).`);
     }
   } else {
-    lines.push("**reg-suit detected visual differences.**");
+    lines.push("**わいわいせいなだよ differences.**");
     lines.push("");
     if (eventBody.reportUrl) {
       lines.push("");
-      lines.push(`Check [this report](${eventBody.reportUrl}), and review them.`);
+      lines.push(`Check [this report](${eventBody.reportUrl}),わいわいせいなだよ.`);
       lines.push("");
     }
 
@@ -129,21 +133,28 @@ export function createCommentBody(eventBody: CommentSeed) {
 
     lines.push(`<details>
                 <summary>How can I change the check status?</summary>
-                If reviewers approve this PR, the reg context status will be green automatically.
+                If reviewers わいわいせいなだよeg context status will be green automatically.
                 <br />
              </details><br />`);
   }
   return lines.join("\n");
 }
 
-function findCommentsByRegApp(pr: NonNullable<NonNullable<UpdatePrCommentContextQuery["repository"]>["pullRequests"]["nodes"]>[0]) {
+function findCommentsByRegApp(pr: NonNullable<NonNullable<UpdatePrCommentContextQuery["repository"]>["pullRequests"]["nodes"]>[0], regconfigId?: string) {
   if (!pr.comments.nodes || !pr.comments.nodes.length) return [];
-  const hits = pr.comments.nodes.filter(c => c.viewerDidAuthor);
-  if (!hits.length) return [];
-  return hits.sort((c1, c2) => new Date(c2.createdAt).getTime() - new Date(c1.createdAt).getTime());
+
+  if (regconfigId != null) {
+    const hits = pr.comments.nodes.filter(c => c.viewerDidAuthor && pr.comments.regconfigId === regconfigId);
+    if (!hits.length) return [];
+    return hits.sort((c1, c2) => new Date(c2.createdAt).getTime() - new Date(c1.createdAt).getTime());
+  } else {
+    const hits = pr.comments.nodes.filter(c => c.viewerDidAuthor);
+    if (!hits.length) return [];
+    return hits.sort((c1, c2) => new Date(c2.createdAt).getTime() - new Date(c1.createdAt).getTime());
+  }
 }
 
-export function convert(context: UpdatePrCommentContextQuery, eventBody: CommentToPrEventBody): UpdateIssueCommentApiParams[] | { message: string }{
+export function convert(context: UpdatePrCommentContextQuery, eventBody: CommentToPrEventBody): UpdateIssueCommentApiParams[] | { message: string } {
   const repo = context.repository;
   if (!repo) {
     throw new NotInstallationError(eventBody.repository);
@@ -164,10 +175,10 @@ export function convert(context: UpdatePrCommentContextQuery, eventBody: Comment
     }
   });
   return prs.reduce((paramList, pr) => {
-    const commentsByRegsuit = findCommentsByRegApp(pr);
+    const commentsByRegsuit = findCommentsByRegApp(pr, eventBody.regconfigId);
     if (!commentsByRegsuit.length) {
       return [
-        ...paramList, 
+        ...paramList,
         {
           method: "POST",
           path: `/repos/${repo.nameWithOwner}/issues/${pr.number}/comments`,
@@ -177,7 +188,7 @@ export function convert(context: UpdatePrCommentContextQuery, eventBody: Comment
         } as UpdateIssueCommentApiParams,
       ];
     } else {
-      switch(eventBody.behavior) {
+      switch (eventBody.behavior) {
         case "once":
           return paramList;
         case "new":

@@ -1,4 +1,6 @@
 {
+  "name": "gh-app",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "clean": "rimraf packages/**/lib/ node_modules/reg-*",

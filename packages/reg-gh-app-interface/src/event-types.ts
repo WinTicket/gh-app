@@ -21,6 +21,7 @@ export interface CommentToPrBody extends BaseEventBody, ResultMetadata {
   deletedItemsCount: number;
   passedItemsCount: number;
   shortDescription?: boolean;
+  regconfigId?: string;
   behavior?: PrCommentBehavior;
   reportUrl?: string;
   headOid?: string;

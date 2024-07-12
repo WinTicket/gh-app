@@ -93,6 +93,8 @@ export type UpdatePrCommentContextQuery = {
         } | null,
         // A list of comments associated with the pull request.
         comments:  {
+          // Identifies if the comments is unique or not.
+          regconfigId: string | null,
           // Identifies the total count of items in the connection.
           totalCount: number,
           // A list of nodes.
